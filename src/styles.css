@@ -309,3 +309,91 @@
     box-shadow: 0 .8rem 1.75rem #273a2b1f;
   }
 }
+
+/* Orçamento: pratos em primeiro plano, resumo compacto e sempre acessível. */
+.quote-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.quote-row {
+  min-height: 5.75rem;
+  margin-block: .5rem;
+  padding: .625rem .75rem;
+  border: 1px solid #273a2b12;
+  border-radius: .75rem;
+  background: var(--paper);
+  box-shadow: 0 .2rem .65rem #273a2b0a;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.quote-row:hover {
+  transform: translateY(-.125rem);
+  border-color: #a5ae7670;
+  box-shadow: 0 .65rem 1.4rem #273a2b18;
+}
+
+.quote-row > img {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: none;
+  border-radius: .625rem;
+  object-fit: cover;
+}
+
+.estimate-card {
+  grid-row: auto;
+  position: static;
+  padding: 1rem;
+  border-radius: .875rem;
+  box-shadow: 0 .4rem 1.1rem #193a3014;
+}
+
+.estimate-top {
+  padding-bottom: .75rem;
+}
+
+.estimate-empty {
+  padding: 1rem 0;
+}
+
+.estimate-items {
+  gap: .5rem;
+  padding: .75rem 0 .5rem;
+}
+
+.estimate-total {
+  padding: .75rem 0;
+}
+
+.estimate-total strong {
+  font-size: 1.5rem;
+}
+
+.copy-button {
+  justify-content: space-between;
+  padding: .75rem 1rem;
+}
+
+.estimate-footnote {
+  margin-top: .75rem;
+  line-height: 1.5;
+}
+
+.estimate-map {
+  margin-top: .75rem;
+  padding-top: .75rem;
+}
+
+@media (min-width: 56.3125rem) {
+  .quote-layout {
+    grid-template-columns: minmax(0, 1.85fr) minmax(16rem, .7fr);
+    gap: clamp(1.5rem, 3.5vw, 3rem);
+  }
+
+  .estimate-card {
+    position: sticky;
+    top: 1.5rem;
+    padding: 1rem 1.1rem;
+  }
+}
