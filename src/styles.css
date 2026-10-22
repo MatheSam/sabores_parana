@@ -407,7 +407,7 @@
   padding-top: .75rem;
 }
 
-@media (min-width: 56.3125rem) {
+@media (min-width: 70.0625rem) {
   .quote-page {
     width: 100%;
     max-width: 96rem;
@@ -427,7 +427,7 @@
   }
 }
 
-@media (max-width: 56.25rem) {
+@media (max-width: 70rem) {
   .announcement {
     flex-wrap: wrap;
     column-gap: .4rem;
