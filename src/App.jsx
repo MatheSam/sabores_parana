@@ -62,7 +62,7 @@ function App() {
     catch { setCopied(false); }
   };
 
-  return <><div className="announcement"><Sparkles size={13}/> SABORES COM RAIZ, FEITOS PARA COMPARTILHAR <span>·</span> Curitiba & região</div><Header page={page} setPage={setPage} navigate={navigate} count={count}/>
+  return <><div className="announcement"><Sparkles size={13} aria-hidden="true"/><span className="announcement-message">SABORES COM RAIZ, FEITOS PARA COMPARTILHAR</span><span className="announcement-divider">·</span><span className="announcement-region">Curitiba &amp; região</span></div><Header page={page} setPage={setPage} navigate={navigate} count={count}/>
     <main>
       {page === 'home' ? <>
         <section className="hero" id="inicio"><div className="hero-copy"><motion.div initial="hidden" animate="show" variants={rise} className="eyebrow"><span className="eyebrow-line"/> cozinha de raiz, do Paraná</motion.div>

@@ -341,6 +341,28 @@
   object-fit: cover;
 }
 
+.announcement {
+  height: auto;
+  min-height: 2rem;
+  padding: .4rem 1rem;
+  gap: .5rem;
+  line-height: 1.35;
+  text-align: center;
+  letter-spacing: .08em;
+}
+
+.announcement > svg {
+  flex: none;
+}
+
+.announcement-divider {
+  color: #a9b27c;
+}
+
+.announcement-region {
+  white-space: nowrap;
+}
+
 .estimate-card {
   grid-row: auto;
   position: static;
@@ -402,5 +424,19 @@
     position: sticky;
     top: 1.5rem;
     padding: 1rem 1.1rem;
+  }
+}
+
+@media (max-width: 56.25rem) {
+  .announcement {
+    flex-wrap: wrap;
+    column-gap: .4rem;
+    row-gap: .2rem;
+    padding: .5rem 1rem;
+    letter-spacing: .04em;
+  }
+
+  .announcement-message {
+    min-width: 0;
   }
 }
