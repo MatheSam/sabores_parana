@@ -386,8 +386,15 @@
 }
 
 @media (min-width: 56.3125rem) {
+  .quote-page {
+    width: 100%;
+    max-width: 96rem;
+    margin-inline: auto;
+    padding-inline: clamp(2rem, 5vw, 4.5rem);
+  }
+
   .quote-layout {
-    grid-template-columns: minmax(0, 1.85fr) minmax(16rem, .7fr);
+    grid-template-columns: minmax(0, 1.65fr) minmax(22rem, .95fr);
     gap: clamp(1.5rem, 3.5vw, 3rem);
   }
 
