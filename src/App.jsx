@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown, Leaf, MapPin, Minus, Plus, ShoppingBag, Sparkles, Trees, X } from 'lucide-react';
 
@@ -16,15 +16,15 @@ const dishes = [
 const money = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const rise = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: .62, ease: [.22, 1, .36, 1] } } };
 
-function Header({ page, setPage, count }) {
-  return <header className="header"><a className="brand" href="#inicio" onClick={() => setPage('home')} aria-label="Sabores do Paraná, início"><span className="brand-mark"><Trees size={23} strokeWidth={1.5}/></span><span>sabores<span className="brand-of"> do</span><br/><b>paraná</b></span></a>
+function Header({ page, setPage, navigate, count }) {
+  return <header className="header"><a className="brand" href="#inicio" onClick={() => navigate('home')} aria-label="Sabores do Paraná, início"><span className="brand-mark"><Trees size={23} strokeWidth={1.5}/></span><span>sabores<span className="brand-of"> do</span><br/><b>paraná</b></span></a>
     <nav className="nav"><a className={page === 'home' ? 'active' : ''} href="#sabores" onClick={() => setPage('home')}>Nossa cozinha</a><a href="#origem" onClick={() => setPage('home')}>De onde vem</a></nav>
-    <button className="quote-nav" onClick={() => { setPage('quote'); window.scrollTo({top: 0, behavior: 'smooth'}); }}>Monte seu orçamento <span className="quote-count">{count || <ArrowUpRight size={14}/>}</span></button>
+    <button className="quote-nav" onClick={() => navigate('quote')}>Monte seu orçamento <span className="quote-count">{count || <ArrowUpRight size={14}/>}</span></button>
   </header>;
 }
 
 function App() {
-  const [page, setPage] = useState('home');
+  const [page, setPage] = useState(() => window.location.hash === '#privacidade' ? 'privacy' : window.location.hash === '#orcamento' ? 'quote' : 'home');
   const [category, setCategory] = useState('Tudo');
   const [quantities, setQuantities] = useState({});
   const [guests, setGuests] = useState(20);
@@ -43,14 +43,26 @@ function App() {
     const dish = dishes.find(d => d.id === id);
     setQty(id, dish?.unit === 'por pessoa' ? (quantities[id] ? 0 : 1) : (quantities[id] || 0) + 1);
   };
-  const showQuote = () => { setPage('quote'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const navigate = (nextPage) => {
+    setPage(nextPage);
+    const nextHash = nextPage === 'privacy' ? '#privacidade' : nextPage === 'quote' ? '#orcamento' : '#inicio';
+    if (window.location.hash !== nextHash) window.history.pushState({ page: nextPage }, '', nextHash);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  useEffect(() => {
+    const syncPage = () => setPage(window.location.hash === '#privacidade' ? 'privacy' : window.location.hash === '#orcamento' ? 'quote' : 'home');
+    window.addEventListener('popstate', syncPage);
+    window.addEventListener('hashchange', syncPage);
+    return () => { window.removeEventListener('popstate', syncPage); window.removeEventListener('hashchange', syncPage); };
+  }, []);
+  const showQuote = () => navigate('quote');
   const copyQuote = async () => {
     const text = `PRÉ-ORÇAMENTO · Sabores do Paraná\n${summary || 'Nenhum item selecionado'}\n\nConvidados: ${guests}\nEstimativa: ${money(total)} (${money(perPerson)} por pessoa)\n\nValores ilustrativos, sujeitos a confirmação de disponibilidade e entrega.`;
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2500); }
     catch { setCopied(false); }
   };
 
-  return <><div className="announcement"><Sparkles size={13}/> SABORES COM RAIZ, FEITOS PARA COMPARTILHAR <span>·</span> Curitiba & região</div><Header page={page} setPage={setPage} count={count}/>
+  return <><div className="announcement"><Sparkles size={13}/> SABORES COM RAIZ, FEITOS PARA COMPARTILHAR <span>·</span> Curitiba & região</div><Header page={page} setPage={setPage} navigate={navigate} count={count}/>
     <main>
       {page === 'home' ? <>
         <section className="hero" id="inicio"><div className="hero-copy"><motion.div initial="hidden" animate="show" variants={rise} className="eyebrow"><span className="eyebrow-line"/> cozinha de raiz, do Paraná</motion.div>
@@ -68,7 +80,7 @@ function App() {
         </section>
         <section className="origin-section" id="origem"><div className="origin-photo"><img src={`${IMAGE_BASE}pierogi.jpg`} alt="Pierogi feito à mão com cebolas douradas" loading="lazy"/><span>COLÔNIA POLONESA · PARANÁ</span></div><div className="origin-copy"><span className="eyebrow"><span className="eyebrow-line"/> sabores que contam</span><h2>Um estado.<br/><em>Muitas origens.</em></h2><p>O Paraná se revela nos detalhes: no vapor da panela de barro, no pinhão recém-colhido, nas massas trazidas de longe e no café que sempre cabe mais um.</p><p>Nosso cardápio celebra essa mistura — do litoral à serra — com o cuidado de quem sabe que comida boa também guarda memória.</p><a className="map-link" href="https://www.google.com/maps/search/comida+t%C3%ADpica+paranaense+Morretes+PR" target="_blank" rel="noreferrer"><MapPin size={17}/> Explore o litoral no mapa <ArrowUpRight size={15}/></a></div><div className="origin-stamp">feito<br/>com<br/><b>tempo</b></div></section>
         <section className="invite"><div className="invite-ornament"><Trees size={39} strokeWidth={1}/></div><span className="eyebrow">pra dividir, celebrar, lembrar</span><h2>A próxima mesa<br/>pode ser <em>a sua.</em></h2><p>Almoço em família, festa de empresa ou só vontade de comer bem. A gente ajuda a montar.</p><button className="button-cream" onClick={showQuote}>Monte seu orçamento <ArrowRight size={16}/></button><div className="invite-map"><a href="https://www.google.com/maps/search/restaurantes+de+comida+paranaense+Curitiba+PR" target="_blank" rel="noreferrer"><MapPin size={15}/> Curitiba, Paraná <ArrowUpRight size={14}/></a></div></section>
-      </> : <section className="quote-page"><div className="quote-top"><button className="back-link" onClick={()=>setPage('home')}><ArrowLeft size={16}/> voltar ao cardápio</button><span className="eyebrow"><span className="eyebrow-line"/> sua mesa, do seu jeito</span></div><div className="quote-intro"><h1>Vamos montar<br/><em>seu encontro.</em></h1><p>Escolha os sabores e as quantidades. A estimativa aparece na hora — depois, a gente ajusta cada detalhe junto.</p></div>
+      </> : page === 'privacy' ? <section className="privacy-page section-pad" id="privacidade"><div className="privacy-heading"><button className="back-link" onClick={()=>navigate('home')}><ArrowLeft size={16}/> voltar ao cardápio</button><span className="eyebrow"><span className="eyebrow-line"/> transparência à mesa</span><h1>Política de<br/><em>privacidade.</em></h1><p>Atualizada em 22 de outubro de 2026</p></div><div className="privacy-content"><article className="privacy-card"><h2>Sobre esta versão</h2><p>Esta página descreve como funciona a vitrine demonstrativa Sabores do Paraná. O responsável é a equipe do projeto Sabores do Paraná. Ainda não foi informado um canal de contato direto; para conversar sobre privacidade, procure a equipe pelo canal privado em que recebeu este site. Evite publicar dados pessoais em espaços públicos.</p></article><article className="privacy-card"><h2>Dados usados no orçamento</h2><p>Não há cadastro, formulário de contato, pagamento ou envio de pedidos. Os pratos, quantidades e número de convidados ficam somente na memória desta página enquanto ela está aberta. O site não os envia a um servidor nem os salva em uma conta.</p><p>O botão “Copiar pré-orçamento” só copia o resumo para a área de transferência do seu dispositivo quando você o aciona. O conteúdo copiado fica sujeito aos controles do seu dispositivo e pode ser substituído ou apagado por você.</p></article><article className="privacy-card"><h2>Hospedagem e registros técnicos</h2><p>Este site é hospedado pelo GitHub Pages. O GitHub informa que registra endereços IP de visitantes para fins de segurança. Esse tratamento é realizado pelo provedor conforme as próprias políticas. Consulte a <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection" target="_blank" rel="noreferrer">explicação do GitHub sobre dados do Pages</a> e a <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noreferrer">Política de Privacidade do GitHub</a>.</p></article><article className="privacy-card"><h2>Cookies e links externos</h2><p>O site não instala cookies de publicidade nem ferramentas próprias de análise de navegação. Os links do Google Maps abrem um serviço externo; ao acessá-los, você passa a usar os recursos e a política de privacidade do Google.</p></article><article className="privacy-card"><h2>Seus direitos e atualizações</h2><p>A Lei Geral de Proteção de Dados (LGPD) prevê direitos relacionados aos dados pessoais. Como esta vitrine não recebe nem mantém dados de orçamento, pedidos sobre registros técnicos da hospedagem devem ser direcionados ao GitHub. Para saber mais, consulte o <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noreferrer">texto da LGPD</a>. Esta política poderá ser atualizada se o funcionamento do site mudar.</p></article></div></section> : <section className="quote-page"><div className="quote-top"><button className="back-link" onClick={()=>navigate('home')}><ArrowLeft size={16}/> voltar ao cardápio</button><span className="eyebrow"><span className="eyebrow-line"/> sua mesa, do seu jeito</span></div><div className="quote-intro"><h1>Vamos montar<br/><em>seu encontro.</em></h1><p>Escolha os sabores e as quantidades. A estimativa aparece na hora — depois, a gente ajusta cada detalhe junto.</p></div>
           <div className="quote-layout"><div className="quote-picker"><div className="quote-label"><span>01</span><h2>Escolha os sabores</h2></div>{dishes.map(d=><div className="quote-row" key={d.id}><img src={d.image} alt=""/><div className="quote-row-name"><b>{d.name}</b><small>{d.type} · {money(d.price)} / {d.unit}{d.unit === 'por pessoa' && quantities[d.id] ? ` · para ${guests}` : ''}</small></div><div className="quantity">{d.unit === 'por pessoa' ? <><span className="serving-note">{quantities[d.id] ? `${guests} pess.` : '—'}</span><button aria-label={`${quantities[d.id] ? 'Remover' : 'Incluir'} ${d.name} no orçamento`} onClick={()=>add(d.id)}>{quantities[d.id] ? <Minus size={14}/> : <Plus size={14}/>}</button></> : <><button aria-label={`Remover uma porção de ${d.name}`} onClick={()=>setQty(d.id,(quantities[d.id]||0)-1)}><Minus size={14}/></button><span>{quantities[d.id]||0}</span><button aria-label={`Adicionar uma porção de ${d.name}`} onClick={()=>add(d.id)}><Plus size={14}/></button></>}</div></div>)}
             <div className="quote-label guests-label"><span>02</span><h2>Quantas pessoas?</h2></div><div className="guest-control"><span>Convidados estimados</span><div className="quantity"><button aria-label="Diminuir número de convidados" onClick={()=>setGuests(Math.max(1,guests-5))}><Minus size={14}/></button><span>{guests}</span><button aria-label="Aumentar número de convidados" onClick={()=>setGuests(guests+5)}><Plus size={14}/></button></div></div>
             <label className="event-field">Ocasião <span>(opcional)</span><div className="select-wrap"><select defaultValue=""><option value="" disabled>Selecione o tipo de encontro</option><option>Almoço em família</option><option>Festa de aniversário</option><option>Evento corporativo</option><option>Casamento ou celebração</option><option>Outro encontro</option></select><ChevronDown size={17}/></div></label>
@@ -76,7 +88,7 @@ function App() {
             <div className="estimate-guests"><span><Trees size={15}/> Para {guests} pessoas</span><b>{money(perPerson)} <small>/ pessoa</small></b></div><div className="estimate-total"><span>Estimativa total</span><strong>{money(total)}</strong></div><button className="button-primary copy-button" onClick={copyQuote} disabled={!chosen.length}>{copied ? <><Check size={16}/> Resumo copiado</> : <>Copiar pré-orçamento <ArrowRight size={16}/></>}</button><p className="estimate-footnote">Valores ilustrativos para planejamento. O orçamento final depende de disponibilidade, formato de serviço e local de entrega.</p><a className="estimate-map" href="https://www.google.com/maps/search/eventos+Curitiba+PR" target="_blank" rel="noreferrer"><MapPin size={15}/> Consulte locais em Curitiba <ArrowUpRight size={14}/></a></aside></div>
         </section>}
     </main>
-    <footer className="footer"><a className="brand footer-brand" href="#inicio" onClick={()=>setPage('home')}><span className="brand-mark"><Trees size={21}/></span><span>sabores<span className="brand-of"> do</span><br/><b>paraná</b></span></a><span>Feito com tempo, tempero e um pouco de pinhão. <i>✳</i></span><a href="https://www.google.com/maps/search/comida+paranaense+Curitiba+PR" target="_blank" rel="noreferrer">Encontre no mapa <ArrowUpRight size={13}/></a><small>© 2026 Sabores do Paraná · Valores ilustrativos</small></footer>
+    <footer className="footer"><a className="brand footer-brand" href="#inicio" onClick={()=>navigate('home')}><span className="brand-mark"><Trees size={21}/></span><span>sabores<span className="brand-of"> do</span><br/><b>paraná</b></span></a><span>Feito com tempo, tempero e um pouco de pinhão. <i>✳</i></span><a href="https://www.google.com/maps/search/comida+paranaense+Curitiba+PR" target="_blank" rel="noreferrer">Encontre no mapa <ArrowUpRight size={13}/></a><button className="footer-privacy" onClick={()=>navigate('privacy')}>Política de privacidade</button><small>© 2026 Sabores do Paraná · Valores ilustrativos</small></footer>
     <button className="mobile-quote" onClick={showQuote}><ShoppingBag size={17}/> {count ? `${count} ${count === 1 ? 'item' : 'itens'} · orçamento` : 'Monte seu orçamento'} <ArrowRight size={16}/></button>
   </>;
 }
